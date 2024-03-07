@@ -1,0 +1,17 @@
+!!!!  INPUT  !!!!
+LOOK        *
+LOOK_FOOD   *
+LOOK_FIGHT  *
+LOOK_LIFE   *
+LIFETIME    *
+FOODQTY
+
+*=SAME CODE, DIFFERENT INPUTS
+
+!!!!  OUTPUT  !!!!
+MOVE_TO     *
+MOVE_AWAY   *
+EAT         *
+ATTACK
+REPRODUCE
+MOVE_RND    *
