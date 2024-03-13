@@ -1,5 +1,5 @@
 import math
-
+import CellClass
 import GlobalVar
 
 
@@ -42,6 +42,7 @@ class Look(Neuron):
                     mindist = dist
                     Fdirection = direction
                     Fobj = c_obj
+
         if self.look_range >= mindist:
             small_step = 10/self.look_range
             retv = 10 - small_step*mindist
@@ -49,7 +50,7 @@ class Look(Neuron):
         return [-10, [0,0], None]
 
 class MoveTowards(Neuron):
-    def __init__(self, testNAME, IO, look_range=10, weight=None, bias=None, connected=None, inputVal=None):
+    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
         Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
 
     def Calc(self):
@@ -60,3 +61,16 @@ class MoveTowards(Neuron):
         tdir = GlobalVar.Normalize_dist(tdir)
         return tdir, 0, [], []
         #LChangePOS, LChangeFOOD, LRemoveFOOD, LRemoveCELL
+
+class Eat(Neuron):
+    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+
+    def Calc(self):
+        returnFood = 0
+        returnRFood = []
+        for sd in self.inputVal:
+            if sd[0] >= 8 and type(sd[2])==CellClass.Food and sd[2] not in returnRFood:
+                returnFood += sd[2].foodEnergy
+                returnRFood.append(sd[2])
+        return [0,0], returnFood, returnRFood, []

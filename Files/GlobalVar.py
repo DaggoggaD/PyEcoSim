@@ -13,3 +13,7 @@ def Normalize_dist(dist):
 width = 500
 height = 500
 dt = 1
+
+
+#cell variables
+metabolism = 1.5

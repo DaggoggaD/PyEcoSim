@@ -16,11 +16,19 @@ INeuronsDict = {
 ONeuronsDict = {
     0: Neurons.MoveTowards("Move_to", 1),
     1: Neurons.MoveTowards("Move_away", 1),
-    2: Neurons.MoveTowards("Eat", 1),
-    3: Neurons.MoveTowards("Move_rnd", 1),
+    2: Neurons.Eat("Eat", 1),
+    3: Neurons.Eat("Move_rnd", 1),
     4: Neurons.MoveTowards("Attack", 1),
-    5: Neurons.MoveTowards("Reproduce", 1)
+    5: Neurons.Eat("Reproduce", 1)
 }
+
+class Food:
+    def __init__(self, pos, foodEnergy=[]):
+        self.pos = pos
+        self.foodEnergy = foodEnergy
+
+    def draw(self, canvas):
+        pygame.draw.circle(canvas,(0,200,0),self.pos,10,0)
 
 class Cell:
     def __init__(self, genome=None, pos=None):
@@ -31,6 +39,7 @@ class Cell:
         self.Stats = []
         self.pos = pos
         self.wobble = random.randint(-10,10)
+        self.food = 10
 
     def REPR_GENOME(self):
         #IN, OUT, WEIGHT, STATS, BIAS
@@ -104,6 +113,17 @@ class Cell:
         self.pos[0]+=changePOS[0]*GlobalVar.dt
         self.pos[1]+=changePOS[1]*GlobalVar.dt
 
+    def _remove_food_arr(self, removeFOOD, objs):
+        for C in removeFOOD:
+            objs.remove(C)
+            # objs.append(Food([random.randint(0,GlobalVar.width), random.randint(0,GlobalVar.height)], 10))
+
+    def _add_cell_food(self, toAdd):
+        self.food+=toAdd
+
+    def _calc_metabolism(self):
+        self.food-=GlobalVar.metabolism
+
     def initialize(self):
         if self.genome==None:
             self.genome = self._generate_genome(5,5)
@@ -114,12 +134,13 @@ class Cell:
         self.REPR_GENOME()
 
     def brain_step(self, objs):
+        ###Calc Input values
         for IN in self.INeurons:
             Neuron_result = IN.Calc(self, objs)  # -> [retv, Fdirection, Fobj]
             connectedON = IN.connected
-
             connectedON.inputVal.append(Neuron_result)
 
+        ###Calc Output values
         changePOS=[0,0]
         changeFOOD=0
         removeFOOD = []
@@ -135,14 +156,21 @@ class Cell:
             ON.resetIN()
 
         changePOS = GlobalVar.Normalize_dist(changePOS)
+        removeFOOD = list(dict.fromkeys(removeFOOD))
+        removeCELL = list(dict.fromkeys(removeCELL))
 
+        ###Update Cell
         self._moveCell(changePOS)
-        """self._add_cell_food()
+        self._remove_food_arr(removeFOOD, objs)
+        self._add_cell_food(changeFOOD)
+        self._calc_metabolism()
+
+        """
         self._remove_food()
         self._remove_cell()"""
 
     def draw(self, canvas):
-        pygame.draw.circle(canvas,(0,200,0),self.pos,10,0)
+        pygame.draw.circle(canvas,(200,0,0),self.pos,10,0)
 
     def TEST_INEURONS(self, obj, objs):
         print(f"{obj} -> { self.INeurons[0].Calc(obj, objs) }")
