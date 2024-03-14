@@ -1,4 +1,5 @@
 import random
+
 import CellClass
 import pygame
 import GlobalVar
@@ -23,12 +24,15 @@ canvas = pygame.display.set_mode((GlobalVar.width, GlobalVar.height))
 pygame.display.set_caption("My Board")
 Clock = pygame.time.Clock()
 exit=False
-objs = []
+cells = []
 foods = []
-_Populate(1,objs)
+_Populate(5,cells) #REMEMBER!!! CURRENTLY IN THE SAME ARRAY WITH FOOD, IF MORE THAN 1 IT CAUSES AN ERROR
 _FoodPopulate(100,foods)
-_InitializeCells(objs)
-
+_InitializeCells(cells)
+objs = []
+objs.append(cells)
+objs.append(foods)
+print(objs)
 
 #MAIN LOOP
 time = 0
@@ -39,12 +43,12 @@ while not exit:
         if event.type == pygame.QUIT:
             exit = True
 
-    for cell in objs:
+    for cell in objs[0]:
         cell.draw(canvas)
-        cell.brain_step(foods)
+        cell.brain_step(objs)
         #print(cell.food)
 
-    for food in foods:
+    for food in objs[1]:
         food.draw(canvas)
     print(time)
     pygame.display.update( )

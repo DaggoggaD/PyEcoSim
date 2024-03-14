@@ -1,4 +1,6 @@
 import math
+import random
+
 import CellClass
 import GlobalVar
 
@@ -35,8 +37,31 @@ class Look(Neuron):
         mindist = math.inf
         Fdirection = None
         Fobj = None
-        for c_obj in objs:
-            if c_obj!=obj:
+        for dict in objs: ###TO CHANGE INTO LOOKFOOD/LOOKCELL, REMOVE THIS FOR AND PUT OBJS[1] OR OBJS[2] AS ITARR
+            for c_obj in dict:
+                if c_obj!=obj:
+                    dist, direction = self._calc_dist(obj, c_obj)
+                    if mindist > dist:
+                        mindist = dist
+                        Fdirection = direction
+                        Fobj = c_obj
+
+        if self.look_range >= mindist:
+            small_step = 10/self.look_range
+            retv = 10 - small_step*mindist
+            return [retv, Fdirection, Fobj]
+        return [-10, [0,0], None]
+
+class LookFood(Look):
+    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Look.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+
+    def Calc(self, obj, objs):
+        mindist = math.inf
+        Fdirection = None
+        Fobj = None
+        for c_obj in objs[1]:
+            if c_obj != obj:
                 dist, direction = self._calc_dist(obj, c_obj)
                 if mindist > dist:
                     mindist = dist
@@ -44,10 +69,32 @@ class Look(Neuron):
                     Fobj = c_obj
 
         if self.look_range >= mindist:
-            small_step = 10/self.look_range
-            retv = 10 - small_step*mindist
+            small_step = 10 / self.look_range
+            retv = 10 - small_step * mindist
             return [retv, Fdirection, Fobj]
-        return [-10, [0,0], None]
+        return [-10, [0, 0], None]
+
+class LookCell(Look):
+    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Look.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+
+    def Calc(self, obj, objs):
+        mindist = math.inf
+        Fdirection = None
+        Fobj = None
+        for c_obj in objs[0]:
+            if c_obj != obj:
+                dist, direction = self._calc_dist(obj, c_obj)
+                if mindist > dist:
+                    mindist = dist
+                    Fdirection = direction
+                    Fobj = c_obj
+
+        if self.look_range >= mindist:
+            small_step = 10 / self.look_range
+            retv = 10 - small_step * mindist
+            return [retv, Fdirection, Fobj]
+        return [-10, [0, 0], None]
 
 class MoveTowards(Neuron):
     def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
@@ -56,8 +103,8 @@ class MoveTowards(Neuron):
     def Calc(self):
         tdir = [0,0]
         for sd in self.inputVal:
-            tdir[0]+=sd[0]*sd[1][0]
-            tdir[1]+=sd[0]*sd[1][1]
+            tdir[0]+=sd[0]*sd[1][0]+random.randint(-10,10)/100
+            tdir[1]+=sd[0]*sd[1][1]+random.randint(-10,10)/100
         tdir = GlobalVar.Normalize_dist(tdir)
         return tdir, 0, [], []
         #LChangePOS, LChangeFOOD, LRemoveFOOD, LRemoveCELL

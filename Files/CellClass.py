@@ -6,9 +6,9 @@ import GlobalVar
 
 INeuronsDict = {
     0: Neurons.Look("Look", 0),
-    1: Neurons.Look("Look_food", 0),
+    1: Neurons.LookFood("Look_food", 0),
     2: Neurons.Look("Look_fight", 0),
-    3: Neurons.Look("Look_life", 0),
+    3: Neurons.LookCell("Look_life", 0),
     4: Neurons.Look("Lifetime", 0),
     5: Neurons.Look("FoodQTY", 0)
 }
@@ -115,8 +115,9 @@ class Cell:
 
     def _remove_food_arr(self, removeFOOD, objs):
         for C in removeFOOD:
-            objs.remove(C)
-            # objs.append(Food([random.randint(0,GlobalVar.width), random.randint(0,GlobalVar.height)], 10))
+            if C in objs:
+                objs.remove(C)
+                objs.append(Food([random.randint(0,GlobalVar.width), random.randint(0,GlobalVar.height)], 10))
 
     def _add_cell_food(self, toAdd):
         self.food+=toAdd
@@ -134,6 +135,8 @@ class Cell:
         self.REPR_GENOME()
 
     def brain_step(self, objs):
+        cells = objs[0]
+        foods = objs[1]
         ###Calc Input values
         for IN in self.INeurons:
             Neuron_result = IN.Calc(self, objs)  # -> [retv, Fdirection, Fobj]
@@ -161,7 +164,7 @@ class Cell:
 
         ###Update Cell
         self._moveCell(changePOS)
-        self._remove_food_arr(removeFOOD, objs)
+        self._remove_food_arr(removeFOOD, foods)
         self._add_cell_food(changeFOOD)
         self._calc_metabolism()
 
