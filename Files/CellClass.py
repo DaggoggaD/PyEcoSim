@@ -40,12 +40,26 @@ class Cell:
         self.pos = pos
         self.wobble = random.randint(-10,10)
         self.food = 10
+        self.radius = 10
 
     def REPR_GENOME(self):
         #IN, OUT, WEIGHT, STATS, BIAS
         print("IN, OUT, WEIGHT, STATS, BIAS")
         print(self.genome)
         print(f"[{self.INeurons},{self.ONeurons},{self.Stats}]\n")
+
+    def REPR_CELL(self, canvas):
+        print("Cell's brain")
+        for i in range(len(self.INeuronsCOMP)):
+            IN = self.INeuronsCOMP[i][0]
+            ON = self.ONeurons[i]
+            strV=f"{IN.name}--->{ON.name}"
+            GlobalVar.Render_Text(strV, (0,0,0), [GlobalVar.width,10+30*i], canvas)
+
+
+
+    def BOUNDARY_POS(self):
+        return self.pos[0]-self.radius, self.pos[0]+self.radius, self.pos[1]-self.radius, self.pos[1]+self.radius
 
     def _generate_genome(self, geneLen, statLen):
         #instead of a long string of bin numbers, a single string of decimal numbers
@@ -125,6 +139,9 @@ class Cell:
     def _calc_metabolism(self):
         self.food-=GlobalVar.metabolism
 
+    def _mutate_genome(self):
+        print(self.genome)
+
     def initialize(self):
         if self.genome==None:
             self.genome = self._generate_genome(5,5)
@@ -172,8 +189,12 @@ class Cell:
         self._remove_food()
         self._remove_cell()"""
 
+    def reproduce(self):
+        mut_genome = self._mutate_genome()
+        cell = Cell()
+
     def draw(self, canvas):
-        pygame.draw.circle(canvas,(200,0,0),self.pos,10,0)
+        pygame.draw.circle(canvas,(200,0,0),self.pos,self.radius,0)
 
     def TEST_INEURONS(self, obj, objs):
         print(f"{obj} -> { self.INeurons[0].Calc(obj, objs) }")

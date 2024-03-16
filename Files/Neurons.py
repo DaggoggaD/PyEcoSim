@@ -18,10 +18,10 @@ class Neuron:
     def resetIN(self):
         self.inputVal=[]
 
-
 class Look(Neuron):
     def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
         Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+        self.name = "LOOK"
         self.look_range = look_range
 
     def _calc_dist(self, obj, cobj):
@@ -49,12 +49,13 @@ class Look(Neuron):
         if self.look_range >= mindist:
             small_step = 10/self.look_range
             retv = 10 - small_step*mindist
-            return [retv, Fdirection, Fobj]
+            return [retv*self.weight+self.bias, Fdirection, Fobj]
         return [-10, [0,0], None]
 
 class LookFood(Look):
     def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
         Look.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+        self.name = "LOOK FOOD"
 
     def Calc(self, obj, objs):
         mindist = math.inf
@@ -71,12 +72,13 @@ class LookFood(Look):
         if self.look_range >= mindist:
             small_step = 10 / self.look_range
             retv = 10 - small_step * mindist
-            return [retv, Fdirection, Fobj]
+            return [retv*self.weight+self.bias, Fdirection, Fobj]
         return [-10, [0, 0], None]
 
 class LookCell(Look):
     def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
         Look.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+        self.name = "LOOK CELL"
 
     def Calc(self, obj, objs):
         mindist = math.inf
@@ -93,12 +95,13 @@ class LookCell(Look):
         if self.look_range >= mindist:
             small_step = 10 / self.look_range
             retv = 10 - small_step * mindist
-            return [retv, Fdirection, Fobj]
+            return [retv*self.weight+self.bias, Fdirection, Fobj]
         return [-10, [0, 0], None]
 
 class MoveTowards(Neuron):
     def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
         Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+        self.name = "MOVE TOWARDS"
 
     def Calc(self):
         tdir = [0,0]
@@ -110,14 +113,16 @@ class MoveTowards(Neuron):
         #LChangePOS, LChangeFOOD, LRemoveFOOD, LRemoveCELL
 
 class Eat(Neuron):
-    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None, activation_val=8):
+        self.activation_val = activation_val
         Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+        self.name = "EAT"
 
     def Calc(self):
         returnFood = 0
         returnRFood = []
         for sd in self.inputVal:
-            if sd[0] >= 8 and type(sd[2])==CellClass.Food and sd[2] not in returnRFood:
+            if sd[0] >= self.activation_val and type(sd[2])==CellClass.Food and sd[2] not in returnRFood:
                 returnFood += sd[2].foodEnergy
                 returnRFood.append(sd[2])
         return [0,0], returnFood, returnRFood, []
