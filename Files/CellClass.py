@@ -1,4 +1,5 @@
 import copy
+import math
 import random
 import pygame
 import Neurons
@@ -41,6 +42,8 @@ class Cell:
         self.wobble = random.randint(-10,10)
         self.food = 10
         self.radius = 10
+        self.spawn_gen = 0
+        self.color = (200,0,0)
 
     def REPR_GENOME(self):
         #IN, OUT, WEIGHT, STATS, BIAS
@@ -48,14 +51,15 @@ class Cell:
         print(self.genome)
         print(f"[{self.INeurons},{self.ONeurons},{self.Stats}]\n")
 
+
     def REPR_CELL(self, canvas):
-        print("Cell's brain")
+        lastrowind = 0
         for i in range(len(self.INeuronsCOMP)):
             IN = self.INeuronsCOMP[i][0]
             ON = self.ONeurons[i]
-            strV=f"{IN.name}--->{ON.name}"
+            strV=f"BIAS:{IN.bias}; {IN.name}:{round(ON.lastCalcVal[0][0],2)}--->{ON.name}"
             GlobalVar.Render_Text(strV, (0,0,0), [GlobalVar.width,10+30*i], canvas)
-
+            lastrowind = 10+30*i
 
 
     def BOUNDARY_POS(self):
@@ -97,6 +101,8 @@ class Cell:
                 if gen.index(sec) == 0:
                     IN.append([copy.copy(INeuronsDict[gene]), gen[2][sec.index(gene)], gen[4][sec.index(gene)]])
                 elif gen.index(sec) == 1:
+
+
                     ON.append(copy.copy(ONeuronsDict[gene]))
                 elif gen.index(sec) == 3:
                     ST.append(gene)
@@ -105,16 +111,19 @@ class Cell:
 
     def _connect_neurons(self, IN, ON):
         for i in range(len(IN)):
-            currIN = IN[i]
-            currON = ON[i]
-            currIN[0].weight = currIN[1]
-            currIN[0].bias = currIN[2]
-            currIN[0].connected = currON
-            currON.connected = currIN[0]
-            #check connections
-            """
-            print(f"{currIN[0]} -> {currIN[0].connected}")
-            print(f"{currON} -> {currON.connected}\n")"""
+            try:
+                currIN = IN[i]
+                currON = ON[i]
+                currIN[0].weight = currIN[1]
+                currIN[0].bias = currIN[2]
+                currIN[0].connected = currON
+                currON.connected = currIN[0]
+                #check connections
+                """
+                print(f"{currIN[0]} -> {currIN[0].connected}")
+                print(f"{currON} -> {currON.connected}\n")"""
+            except:
+                print("error in _connect_neurons, check for reason")
 
     def _random_pos(self):
         self.pos = [random.randint(0, GlobalVar.width), random.randint(0, GlobalVar.height)]
@@ -126,6 +135,15 @@ class Cell:
     def _moveCell(self, changePOS):
         self.pos[0]+=changePOS[0]*GlobalVar.dt
         self.pos[1]+=changePOS[1]*GlobalVar.dt
+
+        if self.pos[0] >= GlobalVar.width:
+            self.pos[0] = GlobalVar.width
+        elif self.pos[0] <= 0:
+            self.pos[0]=0
+        if self.pos[1] >= GlobalVar.height:
+            self.pos[1]= GlobalVar.height
+        if self.pos[1] <= 0:
+            self.pos[1] = 0
 
     def _remove_food_arr(self, removeFOOD, objs):
         for C in removeFOOD:
@@ -140,16 +158,59 @@ class Cell:
         self.food-=GlobalVar.metabolism
 
     def _mutate_genome(self):
-        print(self.genome)
+        # instead of a long string of bin numbers, a single string of decimal numbers
+        # genome divided in: INgenome OUgenome WGgenome STgenome Bias
+        genome = copy.deepcopy(self.genome)
+        # INgenome: 0-5 * genomeLen
+        inGenome = genome[0]
+        for i in range(len(inGenome)):
+            randv = random.randint(0,100)
+            if randv <= GlobalVar.mutation_chance:
+                inGenome[i] = random.randint(0,5)
+
+        # OUTgenome: 0-5 * genomeLen
+        outGenome = genome[1]
+        for i in range(len(outGenome)):
+            randv = random.randint(0,100)
+            if randv <= GlobalVar.mutation_chance:
+                outGenome[i] = random.randint(0,5)
+
+        # WEIGHTgenome: 0-1 * genomeLen
+        weightGenome = genome[2]
+        for i in range(len(weightGenome)):
+            randv = random.randint(0, 100)
+            if randv <= GlobalVar.mutation_chance:
+                weightGenome[i] = round(random.random( ), 4)
+
+
+        # STATSgenome: 0-10 * genomeLen
+        statsGenome = genome[3]
+        for i in range(len(statsGenome)):
+            randv = random.randint(0, 100)
+            if randv <= GlobalVar.mutation_chance:
+                statsGenome[i] = round(random.random( ) * 10, 4)
+
+
+        # BIAS genome: 0-1 * genomeLen
+        biasGenome = genome[4]
+        for i in range(len(biasGenome)):
+            randv = random.randint(0, 100)
+            if randv <= GlobalVar.mutation_chance:
+                biasGenome[i] = round(random.random( ), 4)
+
+        Ngenome = [inGenome, outGenome,weightGenome, statsGenome, biasGenome]
+        return Ngenome
 
     def initialize(self):
         if self.genome==None:
             self.genome = self._generate_genome(5,5)
         self.INeuronsCOMP, self.ONeurons, self.Stats = self._decode_genome(self.genome)
+        #print(f"catch: {self.genome}, { self.ONeurons }")
         self._connect_neurons(self.INeuronsCOMP, self.ONeurons)
         self._separeIN()
         self._random_pos()
         self.REPR_GENOME()
+        self.food=0
 
     def brain_step(self, objs):
         cells = objs[0]
@@ -169,7 +230,8 @@ class Cell:
             LChangePOS, LChangeFOOD, LRemoveFOOD, LRemoveCELL = ON.Calc()
             changePOS[0]+=LChangePOS[0]
             changePOS[1]+=LChangePOS[1]
-            changeFOOD+=LChangeFOOD
+            if changeFOOD==0:
+                changeFOOD+=LChangeFOOD
             [removeFOOD.append(a) for a in LRemoveFOOD]
             [removeCELL.append(a) for a in LRemoveCELL]
 
@@ -191,10 +253,14 @@ class Cell:
 
     def reproduce(self):
         mut_genome = self._mutate_genome()
-        cell = Cell()
+        newCell = Cell(mut_genome)
+        newCell.initialize()
+        return newCell
 
     def draw(self, canvas):
-        pygame.draw.circle(canvas,(200,0,0),self.pos,self.radius,0)
+        pygame.draw.circle(canvas,self.color,self.pos,self.radius,0)
+        if GlobalVar.debug:
+            GlobalVar.Render_Text(f"{str(int(self.food))}", (0, 0, 0), self.pos, canvas)
 
     def TEST_INEURONS(self, obj, objs):
         print(f"{obj} -> { self.INeurons[0].Calc(obj, objs) }")
