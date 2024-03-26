@@ -21,9 +21,9 @@ A custom environment and cell creator will be implemented along with a "history"
 
 *The following images show the same simulation through different stages of evolution. The different cells colour highlights the different generations they were born in.*
 
-<div align="center"><img src="./GITIMG/GITNEW1.png" width="33%">
-<img src="./GITIMG/GITNEW3.png" width=33%>
-<img src="./GITIMG/GITNEW4.png" width=33%></div>
+<div align="center"><img src="./GITIMG/GITNEW1.png" width="30%">
+<img src="./GITIMG/GITNEW3.png" width=30%>
+<img src="./GITIMG/GITNEW4.png" width=30%></div>
 
 # STATUS
 * Currently working on the new cell's brain
