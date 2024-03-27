@@ -20,6 +20,16 @@ class Neuron:
         self.lastCalcVal = self.inputVal
         self.inputVal=[]
 
+class Lifetime(Neuron):
+    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+        self.name = "LIFETIME"
+
+    def Calc(self, obj, objs):
+        maxAge = GlobalVar.sim_len
+        retv = (obj.age*10)/maxAge
+        return [retv*self.weight+self.bias, [0,0], None, 1000]
+
 class Look(Neuron):
     def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
         Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
@@ -31,7 +41,8 @@ class Look(Neuron):
         cpos = cobj.pos
         distx = cpos[0]-pos[0]
         disty = cpos[1]-pos[1]
-        dist = math.sqrt(distx**2+disty**2)
+        dist = 0.5 * (abs(distx) + abs(disty) + max(abs(distx), abs(disty)))
+        #old:   dist = math.sqrt(distx**2+disty**2)
 
         return dist, GlobalVar.Normalize_dist([distx, disty])
 
@@ -114,6 +125,24 @@ class MoveTowards(Neuron):
         tdir = GlobalVar.Normalize_dist(tdir)
         return tdir, 0, [], []
         #LChangePOS, LChangeFOOD, LRemoveFOOD, LRemoveCELL
+
+class MoveAway(Neuron):
+    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+        self.name = "MOVE AWAY"
+
+
+    def Calc(self):
+        tdir = [0,0]
+        for sd in self.inputVal:
+            tdir[0]+=sd[0]*sd[1][0]+random.randint(-10,10)/100
+            tdir[1]+=sd[0]*sd[1][1]+random.randint(-10,10)/100
+        tdir[0]=-tdir[0]
+        tdir[1]=-tdir[1]
+        tdir = GlobalVar.Normalize_dist(tdir)
+        return tdir, 0, [], []
+        #LChangePOS, LChangeFOOD, LRemoveFOOD, LRemoveCELL
+
 
 class Eat(Neuron):
     def __init__(self, testNAME, IO, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=3):
