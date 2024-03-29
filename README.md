@@ -1,6 +1,11 @@
 # PyEcoSim
-An ecosystem simulator written in Python with genes and a low-level brain.
-This simulator is currently under a complete overhaul process.
+
+<div align="center">
+<img src="./GITIMG/Title.png">
+</div>
+
+
+### <div align="center">Simulating evolving cells in an adaptive environment.</div>
 
 ## Features
 The system implements a number of cells (30) wich have both a genome and a series of neurons, connected in a "neural network" fashion.
