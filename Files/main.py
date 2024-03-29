@@ -10,7 +10,6 @@ from shapely.geometry import Polygon
 pygame.init( )
 
 ###FUNCTIONS###
-
 #Adds the initial population.
 def _Populate(N, arr):
     for i in range(N):
@@ -20,6 +19,7 @@ def _Populate(N, arr):
 def _FoodPopulate(N, arr):
     for i in range(N):
         fd = CellClass._check_food_coll()
+        fd.color = (0,random.randint(175,225),0)
         arr.append(fd)
 
 #Each cell needs to be initialized, decoding/creating it's genome,
@@ -45,7 +45,6 @@ def _Draw_Walls(scr):
 
 
 ###VARIABLES###
-
 #UI info vars.
 gen=0
 avgfood=0
@@ -88,6 +87,7 @@ while not exit:
         for cell in cells:
             cell.food=0
             cell.age = 0
+            cell.shared = 0
     time+=1
 
     #Check pygame events.
@@ -127,7 +127,6 @@ while not exit:
                 file = open("Blocks.txt", "w")
                 GlobalVar.Walls=[]
                 file.close()
-
 
     #Updates and draws on canvas all cells (draw and brain_step func).
     for cell in objs[0]:
@@ -184,6 +183,10 @@ while not exit:
             GlobalVar.metabolism += 0.05
         if avgfood <=-200:
             GlobalVar.metabolism -= 0.05
+
+        foods = []
+        _FoodPopulate(100, foods)
+        objs[1]=foods
 
     #Fps getter.
     Clock.tick(60)

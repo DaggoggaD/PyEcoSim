@@ -1,7 +1,6 @@
 import copy
 import math
 import random
-
 import CellClass
 import GlobalVar
 
@@ -29,6 +28,21 @@ class Lifetime(Neuron):
         maxAge = GlobalVar.sim_len
         retv = (obj.age*10)/maxAge
         return [retv*self.weight+self.bias, [0,0], None, 1000]
+
+class FoodQty(Neuron):
+    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+        self.name = "FOOD QTY"
+
+    def Calc(self, obj, objs):
+        if obj.food < -100:
+            return [0*self.weight+self.bias, [0,0], None, 1000]
+        elif obj.food > 100:
+            return [10*self.weight+self.bias, [0,0], None, 1000]
+        else:
+            custmFood = obj.food + 100
+            retv = custmFood/20
+            return [retv*self.weight+self.bias, [0,0], None, 1000]
 
 class Look(Neuron):
     def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
@@ -143,7 +157,6 @@ class MoveAway(Neuron):
         return tdir, 0, [], []
         #LChangePOS, LChangeFOOD, LRemoveFOOD, LRemoveCELL
 
-
 class Eat(Neuron):
     def __init__(self, testNAME, IO, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=3):
         self.activation_val = activation_val
@@ -156,6 +169,21 @@ class Eat(Neuron):
         returnRFood = []
         for sd in self.inputVal:
             if sd[0] >= self.activation_val and type(sd[2])==CellClass.Food and sd[2] not in returnRFood and sd[3] < self.look_range:
-                returnFood += sd[2].foodEnergy
-                returnRFood.append(sd[2])
+                if sd[2].foodEnergy > GlobalVar.metabolism + 0.2:
+                    returnFood+=GlobalVar.metabolism + 0.2
+                    sd[2].foodEnergy-=GlobalVar.metabolism + 0.2
+                else:
+                    returnFood += sd[2].foodEnergy
+                    returnRFood.append(sd[2])
+
         return [0,0], returnFood, returnRFood, []
+
+class Share(Neuron):
+    def __init__(self, testNAME, IO, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=3):
+        self.activation_val = activation_val
+        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+        self.name = "SHARE"
+        self.look_range = look_range
+
+    def Calc(self):
+        return [0,0], -10, ["SHARED"], []

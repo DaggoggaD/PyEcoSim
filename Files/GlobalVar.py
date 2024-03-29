@@ -1,5 +1,4 @@
 import pygame
-
 pygame.init()
 
 ###Variables###
@@ -18,8 +17,8 @@ metabolism = 0.2
 mutation_chance = 10
 debug = False
 
-
 ###Functions###
+
 #Normalizes previously calculated distances.
 def Normalize_dist(dist):
     adir = [abs(dist[0]), abs(dist[1])]

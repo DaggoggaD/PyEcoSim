@@ -16,23 +16,23 @@ INeuronsDict = {
     2: Neurons.Look("Look_fight", 0),
     3: Neurons.LookCell("Look_life", 0),  #
     4: Neurons.Lifetime("Lifetime", 0),   #
-    5: Neurons.LookFood("FoodQTY", 0)
+    5: Neurons.FoodQty("FoodQTY", 0)      #
 }
 
 #Output neurons types dictionary.
 ONeuronsDict = {
     0: Neurons.MoveTowards("Move_to", 1), #
-    1: Neurons.MoveAway("Move_away", 1), #
-    2: Neurons.Eat("Eat", 1),   #
+    1: Neurons.MoveAway("Move_away", 1),  #
+    2: Neurons.Eat("Eat", 1),             #
     3: Neurons.Eat("Move_rnd", 1),
     4: Neurons.MoveTowards("Attack", 1),
-    5: Neurons.MoveAway("Share", 1)      #/*/*
+    5: Neurons.Share("Share", 1)          #
 }
 
 #Instantiate foods and checks if it's in al legal position.
 #   If not, a new one is instantiated.
 def _check_food_coll():
-    cf = Food([random.randint(0, GlobalVar.width), random.randint(0, GlobalVar.height)], 10)
+    cf = Food([random.randint(0, GlobalVar.width), random.randint(0, GlobalVar.height)], random.randint(10, 50))
 
     #Foods shape placeholder, used to check collision with walls
     p1 = Polygon([
@@ -46,7 +46,10 @@ def _check_food_coll():
     coll = 0
     for pol in GlobalVar.Walls:
         p2 = Polygon(pol)
-        collV = p1.intersects(p2)
+        try:
+            collV = p1.intersects(p2)
+        except:
+            collV = False
         if collV == True:
             coll += 1
 
@@ -63,11 +66,13 @@ class Food:
     def __init__(self, pos, foodEnergy=[]):
         self.pos = pos
         self.foodEnergy = foodEnergy
-        self.radius = 10
+        self.radius = self.foodEnergy
+        self.color = (0,200,0)
 
     #Draw method
     def draw(self, canvas):
-        pygame.draw.circle(canvas,(0,200,0),self.pos,self.radius,0)
+        self.radius = self.foodEnergy
+        pygame.draw.circle(canvas,self.color,self.pos,self.radius/3,0)
 
 #Cell class
 class Cell:
@@ -84,6 +89,7 @@ class Cell:
         self.spawn_gen = 0
         self.color = (200,0,0)
         self.age = 0
+        self.shared = 0
 
     #Represents the cell's genome in the console.
     def REPR_GENOME(self):
@@ -94,11 +100,16 @@ class Cell:
 
     #Draws the cell's brain in the right side of the simulator.
     def REPR_CELL(self, canvas):
+        lastrow = 0
         for i in range(len(self.INeuronsCOMP)):
             IN = self.INeuronsCOMP[i][0]
             ON = self.ONeurons[i]
-            strV=f"BIAS:{IN.bias}; {IN.name}:{round(ON.lastCalcVal[0][0],2)}--->{ON.name}"
+            strV=f"Bias: {IN.bias}; {IN.name}:{round(ON.lastCalcVal[0][0],2)} -> {ON.name}"
             GlobalVar.Render_Text(strV, (0,0,0), [GlobalVar.width,10+30*i], canvas)
+            lastrow+=1
+
+        GlobalVar.Render_Text(f"Food: {int(self.food)}", (0,0,0), [GlobalVar.width,10+30*lastrow], canvas)
+
 
     #Returns the boundaries of the cell.
     def BOUNDARY_POS(self):
@@ -224,6 +235,14 @@ class Cell:
     #Removes the food from foods array which gets digested.
     def _remove_food_arr(self, removeFOOD, objs):
         for C in removeFOOD:
+            if C == "SHARED":
+                if self.food <= 10:
+                    self.food+=10
+                elif self.shared < 5:
+                    fd = _check_food_coll( )
+                    fd.color = (100,255,0)
+                    objs.append(fd)
+                    self.shared+=1
             if C in objs:
                 objs.remove(C)
                 fd = _check_food_coll()
