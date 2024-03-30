@@ -178,7 +178,7 @@ class MoveTowards(Neuron):
         return tdir, 0, [], []
         #LChangePOS, LChangeFOOD, LRemoveFOOD, LRemoveCELL
 
-#Move towards neuron.
+#Move away neuron.
 #   This neuron needs an input_val and a direction.
 #   It then returns a normalized vector in the opposite direction.
 class MoveAway(Neuron):
