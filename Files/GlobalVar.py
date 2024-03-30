@@ -1,4 +1,5 @@
 import pygame
+import math
 pygame.init()
 
 ###Variables###
@@ -11,12 +12,13 @@ font = pygame.font.Font('freesansbold.ttf', 20)
 sim_len = 15
 sim_len = sim_len * 60
 Walls = []
+Area_Sub = 5
 
 #Cell variables
-metabolism = 0.2
+metabolism = 0.1
 mutation_chance = 10
 debug = False
-
+maxGeneVal = 5*5+5*5
 ###Functions###
 
 #Normalizes previously calculated distances.
@@ -40,3 +42,16 @@ def Average_cell_food(arr):
     for v in arr:
         tot+=v.food
     return tot/len(arr)
+
+#Trasform a single int to a (r,g,b) color
+def num_to_rgb(val, max_val=3):
+    if (val > max_val):
+        raise ValueError("val must not be greater than max_val")
+    if (val < 0 or max_val < 0):
+        raise ValueError("arguments may not be negative")
+
+    i = (val * 255 / max_val);
+    r = round(math.sin(0.024 * i + 0) * 127 + 128);
+    g = round(math.sin(0.024 * i + 2) * 127 + 128);
+    b = round(math.sin(0.024 * i + 4) * 127 + 128);
+    return (r,g,b)

@@ -5,7 +5,7 @@ import pygame
 import Neurons
 import GlobalVar
 from shapely.geometry import Polygon
-
+from pygame import gfxdraw
 
 ###VARIABLES###
 
@@ -29,7 +29,7 @@ ONeuronsDict = {
     5: Neurons.Share("Share", 1)          #
 }
 
-#Instantiate foods and checks if it's in al legal position.
+#Instantiate foods and checks if it's in a legal position.
 #   If not, a new one is instantiated.
 def _check_food_coll():
     cf = Food([random.randint(0, GlobalVar.width), random.randint(0, GlobalVar.height)], random.randint(10, 50))
@@ -68,11 +68,47 @@ class Food:
         self.foodEnergy = foodEnergy
         self.radius = self.foodEnergy
         self.color = (0,200,0)
+        self.area = None
+        self.closeAreas = None
+        self._calc_area()
 
     #Draw method
     def draw(self, canvas):
         self.radius = self.foodEnergy
         pygame.draw.circle(canvas,self.color,self.pos,self.radius/3,0)
+
+    # Calculates current and close areas, used for performance improvements
+    def _calc_area(self):
+        final_area = []
+
+        # Current slot calc
+        Nslot = GlobalVar.width / GlobalVar.Area_Sub
+        xslot = math.floor(self.pos[0] / Nslot)
+        yslot = math.floor(self.pos[1] / Nslot)
+        area = xslot + GlobalVar.Area_Sub * yslot
+
+        # Checks for special cases
+        notRight = (area + 1) % GlobalVar.Area_Sub != 0
+        notLeft = area % GlobalVar.Area_Sub != 0
+        notTop = yslot != 0
+        notBot = yslot != GlobalVar.Area_Sub
+
+        # Appends same row areas
+        if notRight: final_area.append(area + 1)
+        if notLeft: final_area.append(area - 1)
+
+        # Appends top row areas
+        if notTop: final_area.append(area - GlobalVar.Area_Sub)
+        if notTop and notRight: final_area.append(area - GlobalVar.Area_Sub + 1)
+        if notTop and notLeft: final_area.append(area - GlobalVar.Area_Sub - 1)
+
+        # Appends bottom row areas
+        if notBot: final_area.append(area + GlobalVar.Area_Sub)
+        if notBot and notRight: final_area.append(area + GlobalVar.Area_Sub + 1)
+        if notBot and notLeft: final_area.append(area + GlobalVar.Area_Sub - 1)
+
+        self.closeAreas = final_area
+        self.area = area
 
 #Cell class
 class Cell:
@@ -90,6 +126,9 @@ class Cell:
         self.color = (200,0,0)
         self.age = 0
         self.shared = 0
+        self.area = None
+        self.closeAreas = None
+        self.genome_code = None
 
     #Represents the cell's genome in the console.
     def REPR_GENOME(self):
@@ -109,6 +148,8 @@ class Cell:
             lastrow+=1
 
         GlobalVar.Render_Text(f"Food: {int(self.food)}", (0,0,0), [GlobalVar.width,10+30*lastrow], canvas)
+        GlobalVar.Render_Text(f"Area: {int(self.area)}", (0,0,0), [GlobalVar.width,10+30*(lastrow+1)], canvas)
+        GlobalVar.Render_Text(f"Area: {self.closeAreas}", (0,0,0), [GlobalVar.width,10+30*(lastrow+2)], canvas)
 
 
     #Returns the boundaries of the cell.
@@ -222,7 +263,10 @@ class Cell:
         coll = 0
         for pol in GlobalVar.Walls:
             p2 = Polygon(pol)
-            collV = p1.intersects(p2)
+            try:
+                collV = p1.intersects(p2)
+            except:
+                collV = False
             if collV==True:
                 coll+=1
 
@@ -301,6 +345,51 @@ class Cell:
         Ngenome = [inGenome, outGenome,weightGenome, statsGenome, biasGenome]
         return Ngenome
 
+    #Calculates current and close areas, used for performance improvements
+    def _calc_area(self):
+        final_area = []
+
+        #Current slot calc
+        #220, 130
+        Nslot = GlobalVar.width/GlobalVar.Area_Sub  #100
+        xslot = math.floor(self.pos[0]/Nslot) #2.2->2
+        yslot = math.floor(self.pos[1]/Nslot) #1.3->1
+        area = xslot+GlobalVar.Area_Sub*yslot #2+5*1
+
+        #Checks for special cases
+        notRight = (area+1)%GlobalVar.Area_Sub!=0
+        notLeft = area%GlobalVar.Area_Sub!=0
+        notTop = yslot != 0
+        notBot = yslot != GlobalVar.Area_Sub
+
+        #Appends same row areas
+        final_area.append(area)
+        if notRight: final_area.append(area+1)
+        if notLeft: final_area.append(area-1)
+
+        #Appends top row areas
+        if notTop: final_area.append(area - GlobalVar.Area_Sub)
+        if notTop and notRight : final_area.append(area - GlobalVar.Area_Sub + 1)
+        if notTop and notLeft : final_area.append(area - GlobalVar.Area_Sub - 1)
+
+        #Appends bottom row areas
+        if notBot: final_area.append(area + GlobalVar.Area_Sub)
+        if notBot and notRight : final_area.append(area + GlobalVar.Area_Sub + 1)
+        if notBot and notLeft : final_area.append(area + GlobalVar.Area_Sub - 1)
+
+        self.closeAreas = final_area
+        self.area = area
+
+    #Calculates color based on genome variation.
+    #   Also used to have a genome variance value
+    def _calc_color(self):
+        ig = self.genome[0]
+        og = self.genome[1]
+        tot = (sum(ig)+sum(og))
+        r,g,b=GlobalVar.num_to_rgb(tot,GlobalVar.maxGeneVal)
+        self.color=(r,g,b)
+        self.genome_code = tot
+
     #Initializes cell.
     #   Genome is generated (if needed);
     #   Genome is decoded and represented in the console;
@@ -313,6 +402,8 @@ class Cell:
         self._connect_neurons(self.INeuronsCOMP, self.ONeurons)
         self._separeIN()
         self._random_pos()
+        self._calc_area()
+        self._calc_color()
         self.REPR_GENOME()
         self.food=0
 
@@ -355,9 +446,9 @@ class Cell:
         self._remove_food_arr(removeFOOD, foods)
         self._add_cell_food(changeFOOD)
         self._calc_metabolism()
+        self._calc_area()
 
         """
-        self._remove_food()
         self._remove_cell()"""
 
     #Handles all steps to reproduce (genome mutation and cell instantiation).
@@ -369,6 +460,7 @@ class Cell:
 
     #Draws the cell on the canvas.
     def draw(self, canvas):
+
         pygame.draw.circle(canvas,self.color,self.pos,self.radius,0)
         if GlobalVar.debug:
             GlobalVar.Render_Text(f"{str(int(self.food))}", (0, 0, 0), self.pos, canvas)

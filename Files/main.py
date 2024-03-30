@@ -28,7 +28,7 @@ def _InitializeCells(arr):
     for cell in arr:
         cell.initialize()
 
-#Custom walls can be added by oressing B to initialize wall building,
+#Custom walls can be added by pressing B to initialize wall building,
 #   and P to add wall points.
 def _Draw_Walls(scr):
     file = open("Blocks.txt", "r")
@@ -127,7 +127,10 @@ while not exit:
                 file = open("Blocks.txt", "w")
                 GlobalVar.Walls=[]
                 file.close()
-
+            #Pause and show grapg
+            if event.key == pygame.K_SPACE:
+                plt.plot(avg_food_history)
+                plt.show()
     #Updates and draws on canvas all cells (draw and brain_step func).
     for cell in objs[0]:
         if time==0:
@@ -165,14 +168,13 @@ while not exit:
         #Kills and reproduces top cells.
         sortList = sorted(cells, key=lambda x: x.food, reverse=True)
         sortList = sortList[:10]
-        ranc = random.randint(0,255)
         cells = [cell for cell in sortList]
 
         for cell in sortList:
             cell.food = 0
             reprC = cell.reproduce()
             reprC.spawn_gen = gen
-            reprC.color = (150, ranc, 200)
+            #reprC.color = (150, ranc, 200)
             reprC.food = 0
             cells.append(reprC)
 
@@ -189,7 +191,7 @@ while not exit:
         objs[1]=foods
 
     #Fps getter.
-    Clock.tick(60)
+    Clock.tick(100)
     fps = Clock.get_fps( )
 
     #Display simulation info.
@@ -202,7 +204,6 @@ while not exit:
 
     #Draws all walls.
     _Draw_Walls(canvas)
-
     pygame.display.update( )
 
 plt.plot(avg_food_history)
