@@ -88,6 +88,8 @@ while not exit:
             cell.food=0
             cell.age = 0
             cell.shared = 0
+            cell.health = 50+ 10*cell.stats["health"]
+            cell.radius = 5 + cell.stats["health"]
     time+=1
 
     #Check pygame events.
@@ -205,6 +207,7 @@ while not exit:
     #Draws all walls.
     _Draw_Walls(canvas)
     pygame.display.update( )
+    objs[0]=cells
 
 plt.plot(avg_food_history)
 plt.show()

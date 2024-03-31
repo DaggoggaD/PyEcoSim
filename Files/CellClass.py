@@ -11,10 +11,10 @@ from pygame import gfxdraw
 
 #Input neurons types dictionary.
 INeuronsDict = {
-    0: Neurons.Look("Look", 0),  #
+    0: Neurons.Look("Look", 0),           #
     1: Neurons.LookFood("Look_food", 0),  #
-    2: Neurons.Look("Look_fight", 0),
-    3: Neurons.LookCell("Look_life", 0),  #
+    2: Neurons.LookFight("Look_fight", 0),#
+    3: Neurons.LookCell("Look_cell", 0),  #
     4: Neurons.Lifetime("Lifetime", 0),   #
     5: Neurons.FoodQty("FoodQTY", 0)      #
 }
@@ -25,7 +25,7 @@ ONeuronsDict = {
     1: Neurons.MoveAway("Move_away", 1),  #
     2: Neurons.Eat("Eat", 1),             #
     3: Neurons.Eat("Move_rnd", 1),
-    4: Neurons.MoveTowards("Attack", 1),
+    4: Neurons.Attack("Attack", 1),
     5: Neurons.Share("Share", 1)          #
 }
 
@@ -129,6 +129,15 @@ class Cell:
         self.area = None
         self.closeAreas = None
         self.genome_code = None
+        self.isFighting = False
+        self.health = 100
+        self.TEST_ATK_POWER = 1
+        self.stats = {
+            "health":1,
+            "speed":1,
+            "attack":1,
+            "metabolism":1
+        }
 
     #Represents the cell's genome in the console.
     def REPR_GENOME(self):
@@ -150,7 +159,7 @@ class Cell:
         GlobalVar.Render_Text(f"Food: {int(self.food)}", (0,0,0), [GlobalVar.width,10+30*lastrow], canvas)
         GlobalVar.Render_Text(f"Area: {int(self.area)}", (0,0,0), [GlobalVar.width,10+30*(lastrow+1)], canvas)
         GlobalVar.Render_Text(f"Area: {self.closeAreas}", (0,0,0), [GlobalVar.width,10+30*(lastrow+2)], canvas)
-
+        GlobalVar.Render_Text(f"Health: {self.health}", (0,0,0), [GlobalVar.width,10+30*(lastrow+3)], canvas)
 
     #Returns the boundaries of the cell.
     def BOUNDARY_POS(self):
@@ -236,8 +245,8 @@ class Cell:
     #   If so, it reverts the movement and changes the cell's direction.
     def _moveCell(self, changePOS):
         prevpos = copy.deepcopy(self.pos)
-        self.pos[0]+=changePOS[0]*GlobalVar.dt
-        self.pos[1]+=changePOS[1]*GlobalVar.dt
+        self.pos[0]+=changePOS[0]*GlobalVar.dt*self.stats["speed"]
+        self.pos[1]+=changePOS[1]*GlobalVar.dt*self.stats["speed"]
 
         #Outside of the screen checks.
         if self.pos[0] >= GlobalVar.width:
@@ -390,6 +399,26 @@ class Cell:
         self.color=(r,g,b)
         self.genome_code = tot
 
+    #When the current cell attacks another, it removes health from the enemy.
+    #   If the enemy dies, food is added to the winner.
+    def _attack_cell(self, removeCELL, cells):
+        for cell in removeCELL:
+            cell.health-=self.TEST_ATK_POWER
+            cell.isFighting=True
+            self.isFighting=True
+            if cell.health <= 0:
+                if cell in cells:
+                    cells.remove(cell)
+                self.food+=20
+
+    #Decodes stats into their respective personality task.
+    def _dec_stats(self, stats):
+        self.stats["health"] = stats[0]             #
+        self.stats["speed"] = (10 - stats[0])/5     #
+        self.stats["attack"] = stats[1]
+        self.stats["metabolism"] = 10 - stats[1]
+
+
     #Initializes cell.
     #   Genome is generated (if needed);
     #   Genome is decoded and represented in the console;
@@ -400,6 +429,7 @@ class Cell:
             self.genome = self._generate_genome(5,5)
         self.INeuronsCOMP, self.ONeurons, self.Stats = self._decode_genome(self.genome)
         self._connect_neurons(self.INeuronsCOMP, self.ONeurons)
+        self._dec_stats(self.Stats)
         self._separeIN()
         self._random_pos()
         self._calc_area()
@@ -445,6 +475,7 @@ class Cell:
         self._moveCell(changePOS)
         self._remove_food_arr(removeFOOD, foods)
         self._add_cell_food(changeFOOD)
+        self._attack_cell(removeCELL, cells)
         self._calc_metabolism()
         self._calc_area()
 
@@ -463,7 +494,7 @@ class Cell:
 
         pygame.draw.circle(canvas,self.color,self.pos,self.radius,0)
         if GlobalVar.debug:
-            GlobalVar.Render_Text(f"{str(int(self.food))}", (0, 0, 0), self.pos, canvas)
+            GlobalVar.Render_Text(f"{str(int(self.health))}", (0, 0, 0), self.pos, canvas)
 
     #Debug function
     def TEST_INEURONS(self, obj, objs):

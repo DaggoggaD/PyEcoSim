@@ -160,6 +160,36 @@ class LookCell(Look):
             return [retv*self.weight+self.bias, Fdirection, Fobj, mindist]
         return [-10, [0, 0], None, 1000]
 
+#Look Cell neuron.
+#   Checks all cells in close areas, and if they're at less
+#   than look_range distance, it's added to the found cells.
+#   It then checks if that cell is fighting, an if so it finds its distance.
+#   The found cells are then sorted in an increasing order based on distance.
+#   The return value ranges between 0 (far) and 10 (close) based on distance and look_range.
+class LookFight(Look):
+    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Look.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+        self.name = "LOOK FIGHT"
+
+    # Calculates return value
+    def Calc(self, obj, objs):
+        mindist = math.inf
+        Fdirection = None
+        Fobj = None
+        for c_obj in objs[0]:
+            if c_obj != obj and c_obj.area in obj.closeAreas and c_obj.isFighting:
+                dist, direction = self._calc_dist(obj, c_obj)
+                if mindist > dist:
+                    mindist = dist
+                    Fdirection = direction
+                    Fobj = c_obj
+
+        if self.look_range >= mindist:
+            small_step = 10 / self.look_range
+            retv = 10 - small_step * mindist
+            return [retv*self.weight+self.bias, Fdirection, Fobj, mindist]
+        return [-10, [0, 0], None, 1000]
+
 #Move towards neuron.
 #   This neurons needs an input_val and a direction.
 #   It then returns a normalized vector in the same direction.
@@ -178,7 +208,7 @@ class MoveTowards(Neuron):
         return tdir, 0, [], []
         #LChangePOS, LChangeFOOD, LRemoveFOOD, LRemoveCELL
 
-#Move away neuron.
+#Move towards neuron.
 #   This neuron needs an input_val and a direction.
 #   It then returns a normalized vector in the opposite direction.
 class MoveAway(Neuron):
@@ -236,3 +266,22 @@ class Share(Neuron):
 
     def Calc(self):
         return [0,0], -10, ["SHARED"], []
+
+#Eat neuron
+#   This neuron needs an input_val and a food object.
+#   If said object is indeed a food, it proceeds to slowly eating
+#   it until there's nothing left.
+#   It returns a change in food and the eaten food object, once it's finished.
+class Attack(Neuron):
+    def __init__(self, testNAME, IO, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=0):
+        self.activation_val = activation_val
+        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+        self.name = "ATTACK"
+        self.look_range = look_range
+
+    def Calc(self):
+        returnRCell = []
+        for sd in self.inputVal:
+            if type(sd[2])==CellClass.Cell and  sd[2] not in returnRCell and sd[3] < self.look_range:
+                returnRCell.append(sd[2])
+        return [0,0], 0, [], returnRCell
