@@ -26,9 +26,12 @@ A custom environment and cell creator will be implemented along with a "history"
 
 *The following images show the same simulation through different stages of evolution. The different cells colour highlights the different generations they were born in.*
 
-<div align="center"><img src="./GITIMG/GITNEW1.png" width="30%">
-<img src="./GITIMG/GITNEW3.png" width=30%>
-<img src="./GITIMG/GITNEW4.png" width=30%></div>
+ ### Initial cells adapting to the environment.
+<img src="./GITIMG/PROJ_ADV_G20.PNG" width="80%"><br>
+ ### The cells start to stabilize with about 100 food on average.
+<img src="./GITIMG/PROJ_ADV_G60.PNG" width=80%><br>
+ ### The cells are mostly stable, with either a carnivore or a herbivore diet.
+<img src="./GITIMG/PROJ_ADV_G100.PNG" width=80%><br>
 
 # STATUS
 * Currently working on the new cell's brain
