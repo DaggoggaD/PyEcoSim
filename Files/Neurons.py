@@ -9,7 +9,7 @@ import GlobalVar
 #Neuron prefab.
 #   Contains the resetIN function for Output neruons.
 class Neuron:
-    def __init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[]):
+    def __init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=[]):
         self.weight = weight            #IN
         self.bias = bias                #IN
         self.connected = connected
@@ -17,6 +17,7 @@ class Neuron:
         self.IO = IO
         self.inputVal = inputVal        #OUT -> [retv, Fdirection, Fobj]
         self.lastCalcVal = None
+        self.index = index
 
     def resetIN(self):
         self.lastCalcVal = self.inputVal
@@ -27,8 +28,8 @@ class Neuron:
 #   A value between 0 (the cell is instantiated)
 #   and 10 (the cell reached the cycle length age).
 class Lifetime(Neuron):
-    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
-        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+    def __init__(self, testNAME, IO, index, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Neuron.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=None)
         self.name = "LIFETIME"
 
     #Calculates return value
@@ -44,8 +45,8 @@ class Lifetime(Neuron):
 #   10 is returned if stored food is above  100;
 #   The return value increases linearly between 0 and 10.
 class FoodQty(Neuron):
-    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
-        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+    def __init__(self, testNAME, IO, index, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Neuron.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=None)
         self.name = "FOOD QTY"
 
     #Calculates return value
@@ -66,8 +67,8 @@ class FoodQty(Neuron):
 #   The found objs are then sorted in an increasing order based on distance.
 #   The return value ranges between 0 (far) and 10 (close) based on distance and look_range.
 class Look(Neuron):
-    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
-        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+    def __init__(self, testNAME, IO, index, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Neuron.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=None)
         self.name = "LOOK"
         self.look_range = look_range
 
@@ -108,8 +109,8 @@ class Look(Neuron):
 #   The found foods are then sorted in an increasing order based on distance.
 #   The return value ranges between 0 (far) and 10 (close) based on distance and look_range.
 class LookFood(Look):
-    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
-        Look.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+    def __init__(self, testNAME, IO, index, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Look.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=None)
         self.name = "LOOK FOOD"
 
     # Calculates return value
@@ -137,8 +138,8 @@ class LookFood(Look):
 #   The found cells are then sorted in an increasing order based on distance.
 #   The return value ranges between 0 (far) and 10 (close) based on distance and look_range.
 class LookCell(Look):
-    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
-        Look.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+    def __init__(self, testNAME, IO, index, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Look.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=None)
         self.name = "LOOK CELL"
 
     # Calculates return value
@@ -167,8 +168,8 @@ class LookCell(Look):
 #   The found cells are then sorted in an increasing order based on distance.
 #   The return value ranges between 0 (far) and 10 (close) based on distance and look_range.
 class LookFight(Look):
-    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
-        Look.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=None)
+    def __init__(self, testNAME, IO, index, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Look.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=None)
         self.name = "LOOK FIGHT"
 
     # Calculates return value
@@ -194,8 +195,8 @@ class LookFight(Look):
 #   This neurons needs an input_val and a direction.
 #   It then returns a normalized vector in the same direction.
 class MoveTowards(Neuron):
-    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
-        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+    def __init__(self, testNAME, IO, index, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Neuron.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=[])
         self.name = "MOVE TOWARDS"
 
 
@@ -212,8 +213,8 @@ class MoveTowards(Neuron):
 #   This neuron needs an input_val and a direction.
 #   It then returns a normalized vector in the opposite direction.
 class MoveAway(Neuron):
-    def __init__(self, testNAME, IO, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
-        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+    def __init__(self, testNAME, IO, index, look_range=100, weight=None, bias=None, connected=None, inputVal=None):
+        Neuron.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=[])
         self.name = "MOVE AWAY"
 
 
@@ -234,9 +235,9 @@ class MoveAway(Neuron):
 #   it until there's nothing left.
 #   It returns a change in food and the eaten food object, once it's finished.
 class Eat(Neuron):
-    def __init__(self, testNAME, IO, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=3):
+    def __init__(self, testNAME, IO, index, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=3):
         self.activation_val = activation_val
-        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+        Neuron.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=[])
         self.name = "EAT"
         self.look_range = look_range
 
@@ -258,9 +259,9 @@ class Eat(Neuron):
 #   When a certain amount of food is stored (checked in CellClass.Cell._remove_food_arr())
 #   food is shared to the ecosystem, spawned in a random location.
 class Share(Neuron):
-    def __init__(self, testNAME, IO, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=3):
+    def __init__(self, testNAME, IO, index, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=3):
         self.activation_val = activation_val
-        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+        Neuron.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=[])
         self.name = "SHARE"
         self.look_range = look_range
 
@@ -273,9 +274,9 @@ class Share(Neuron):
 #   it until there's nothing left.
 #   It returns the attacked cell object, once it's finished.
 class Attack(Neuron):
-    def __init__(self, testNAME, IO, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=0):
+    def __init__(self, testNAME, IO, index, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=0):
         self.activation_val = activation_val
-        Neuron.__init__(self, testNAME, IO, weight=None, bias=None, connected=None, inputVal=[])
+        Neuron.__init__(self, testNAME, IO, index, weight=None, bias=None, connected=None, inputVal=[])
         self.name = "ATTACK"
         self.look_range = look_range
 

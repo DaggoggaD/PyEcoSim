@@ -11,22 +11,22 @@ from pygame import gfxdraw
 
 #Input neurons types dictionary.
 INeuronsDict = {
-    0: Neurons.Look("Look", 0),           #
-    1: Neurons.LookFood("Look_food", 0),  #
-    2: Neurons.LookFight("Look_fight", 0),#
-    3: Neurons.LookCell("Look_cell", 0),  #
-    4: Neurons.Lifetime("Lifetime", 0),   #
-    5: Neurons.FoodQty("FoodQTY", 0)      #
+    0: Neurons.Look(f"Look", 0, 0),                  #
+    1: Neurons.LookFood(f"Look Food", 0, 1),        #
+    2: Neurons.LookFight(f"Look Fight", 0, 2),      #
+    3: Neurons.LookCell(f"Look cell", 0, 3),        #
+    4: Neurons.Lifetime(f"Lifetime", 0, 4),          #
+    5: Neurons.FoodQty(f"Food Quantity", 0, 5)      #
 }
 
 #Output neurons types dictionary.
 ONeuronsDict = {
-    0: Neurons.MoveTowards("Move_to", 1), #
-    1: Neurons.MoveAway("Move_away", 1),  #
-    2: Neurons.Eat("Eat", 1),             #
-    3: Neurons.Eat("Move_rnd", 1),
-    4: Neurons.Attack("Attack", 1),
-    5: Neurons.Share("Share", 1)          #
+    0: Neurons.MoveTowards(f"Move To", 1, 0), #
+    1: Neurons.MoveAway(f"Move Away", 1, 1),  #
+    2: Neurons.Eat(f"Eat", 1, 2),              #
+    3: Neurons.Eat(f"Eat_DUMMY", 1, 3),     #
+    4: Neurons.Attack(f"Attack", 1, 4),        #
+    5: Neurons.Share(f"Share", 1, 5)           #
 }
 
 #Instantiate foods and checks if it's in a legal position.
@@ -148,19 +148,45 @@ class Cell:
 
     #Draws the cell's brain in the right side of the simulator.
     def REPR_CELL(self, canvas):
+        pygame.draw.circle(canvas,(0,0,0),self.pos,self.radius+1,5)
         lastrow = 0
+        I_Draw_Neurons = []
+        O_Draw_Neurons = []
+        Neuron_R_radius = 20
+        maxheight = 0
+
+        #Prepares the brain neurons visualization
+        for i in range(len(INeuronsDict)):
+            IPOS = [GlobalVar.width + 20 + Neuron_R_radius, 10 + 70*i + Neuron_R_radius]
+            OPOS = [GlobalVar.width + 400 - 20 - Neuron_R_radius, 10 + 70*i + Neuron_R_radius]
+
+            I_Draw_Neurons.append(IPOS)
+            O_Draw_Neurons.append(OPOS)
+
+            pygame.draw.circle(canvas, (50, 50, 50), I_Draw_Neurons[i], Neuron_R_radius)
+            GlobalVar.Render_Text(INeuronsDict[i].testNAME, (0,0,0), [I_Draw_Neurons[i][0]-20, I_Draw_Neurons[i][1]+15], canvas)
+            pygame.draw.circle(canvas, (50, 50, 50), O_Draw_Neurons[i], Neuron_R_radius)
+            GlobalVar.Render_Text(ONeuronsDict[i].testNAME, (0,0,0), [O_Draw_Neurons[i][0]+20, O_Draw_Neurons[i][1]+15], canvas, True)
+            maxheight = IPOS[1]+2*15+20
+
+        #Displays brain Neurons connections
         for i in range(len(self.INeuronsCOMP)):
             IN = self.INeuronsCOMP[i][0]
             ON = self.ONeurons[i]
-            strV=f"Bias: {IN.bias}; {IN.name}:{round(ON.lastCalcVal[0][0],2)} -> {ON.name}"
-            GlobalVar.Render_Text(strV, (0,0,0), [GlobalVar.width,10+30*i], canvas)
-            lastrow+=1
 
-        GlobalVar.Render_Text(f"🍏: {int(self.food)}", (0,0,0), [GlobalVar.width+10,10+30*lastrow], canvas)
-        GlobalVar.Render_Text(f"✚: {round( self.health/(50+10*self.stats['health']),2)*100}%", (0,0,0), [GlobalVar.width+10,10+30*(lastrow+1)], canvas)
-        GlobalVar.Render_Text(f"💨: {round(self.stats['speed'],2)}", (0,0,0), [GlobalVar.width+10,10+30*(lastrow+2)], canvas)
-        GlobalVar.Render_Text(f"💥: {round(self.stats['attack'],2)}", (0,0,0), [GlobalVar.width+10,10+30*(lastrow+3)], canvas)
-        GlobalVar.Render_Text(f"⚡️: {round(self.stats['metabolism'],4)}", (0,0,0), [GlobalVar.width+10,10+30*(lastrow+4)], canvas)
+            pygame.draw.line(canvas,(50,50,50),I_Draw_Neurons[IN.index],O_Draw_Neurons[ON.index],2)
+            GlobalVar.Render_Text(str(round(ON.lastCalcVal[0][0],1)), (200, 200, 200),
+                                  [I_Draw_Neurons[IN.index][0]-13,I_Draw_Neurons[IN.index][1]-15], canvas)
+
+            """strV=f"Bias: {IN.bias}; {IN.name}:{round(ON.lastCalcVal[0][0],2)} -> {ON.name}"
+            GlobalVar.Render_Text(strV, (0,0,0), [GlobalVar.width,10+30*i], canvas)
+            lastrow+=1"""
+
+        GlobalVar.Render_Text(f"🍏: {int(self.food)}", (0,0,0), [GlobalVar.width+10,maxheight+30*lastrow], canvas)
+        GlobalVar.Render_Text(f"✚: {round( self.health/(50+10*self.stats['health']),2)*100}%", (0,0,0), [GlobalVar.width+10,maxheight+30*(lastrow+1)], canvas)
+        GlobalVar.Render_Text(f"💨: {round(self.stats['speed'],2)}", (0,0,0), [GlobalVar.width+10,maxheight+30*(lastrow+2)], canvas)
+        GlobalVar.Render_Text(f"💥: {round(self.stats['attack'],2)}", (0,0,0), [GlobalVar.width+10,maxheight+30*(lastrow+3)], canvas)
+        GlobalVar.Render_Text(f"⚡️: {round(self.stats['metabolism'],4)}", (0,0,0), [GlobalVar.width+10,maxheight+30*(lastrow+4)], canvas)
 
 
     #Returns the boundaries of the cell.
@@ -495,7 +521,7 @@ class Cell:
 
         pygame.draw.circle(canvas,self.color,self.pos,self.radius,0)
         if GlobalVar.debug:
-            GlobalVar.Render_Text(f"{str(int(self.health))}", (0, 0, 0), self.pos, canvas)
+            GlobalVar.Render_Text(f"{str(int(self.health))}", (0, 0, 0), [self.pos[0]+20,self.pos[1]], canvas, True)
 
     #Debug function
     def TEST_INEURONS(self, obj, objs):

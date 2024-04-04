@@ -66,7 +66,7 @@ blockStarted = False
 #Initialization calls and vars.
 _Draw_Walls(canvas)
 _Populate(20,cells)
-_FoodPopulate(200,foods)
+_FoodPopulate(GlobalVar.foodN,foods)
 _InitializeCells(cells)
 objs = []
 objs.append(cells)
@@ -89,6 +89,7 @@ while not exit:
             cell.shared = 0
             cell.health = 50+ 10*cell.stats["health"]
             cell.radius = 5 + cell.stats["health"]
+            reprCell = None
     time+=1
 
     #Check pygame events.
@@ -185,13 +186,14 @@ while not exit:
         objs[0]=cells
 
         #Increases/decreases metabolism cost.
-        if avgfood >= 100:
+        """if avgfood >= 100:
             GlobalVar.metabolism += 0.05
         if avgfood <=-200:
             GlobalVar.metabolism -= 0.05
+        """
 
         foods = []
-        _FoodPopulate(200, foods)
+        _FoodPopulate(GlobalVar.foodN, foods)
         objs[1]=foods
 
     #Fps getter.

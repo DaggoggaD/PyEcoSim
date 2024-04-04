@@ -13,6 +13,7 @@ sim_len = 15
 sim_len = sim_len * 60
 Walls = []
 Area_Sub = 5
+foodN = 300
 
 #Cell variables
 metabolism = 0.1
@@ -32,9 +33,13 @@ def Normalize_dist(dist):
     return ndir
 
 #Renders text to the canvas.
-def Render_Text(what, color, where, canvas):
+def Render_Text(what, color, where, canvas,right=False):
     text = font.render(what, 1, pygame.Color(color))
-    canvas.blit(text, where)
+    if right:
+        text_width = text.get_width( )
+        canvas.blit(text, [where[0]-text_width, where[1]])
+    else:
+        canvas.blit(text, where)
 
 #Calcs the average food between all cells.
 def Average_cell_food(arr):
