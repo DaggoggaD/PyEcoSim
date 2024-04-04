@@ -267,11 +267,11 @@ class Share(Neuron):
     def Calc(self):
         return [0,0], -10, ["SHARED"], []
 
-#Eat neuron
-#   This neuron needs an input_val and a food object.
-#   If said object is indeed a food, it proceeds to slowly eating
+#Attack neuron
+#   This neuron needs an input_val and a cell object.
+#   If said object is indeed a cell, it proceeds to attack
 #   it until there's nothing left.
-#   It returns a change in food and the eaten food object, once it's finished.
+#   It returns the attacked cell object, once it's finished.
 class Attack(Neuron):
     def __init__(self, testNAME, IO, look_range=10, weight=None, bias=None, connected=None, inputVal=None, activation_val=0):
         self.activation_val = activation_val

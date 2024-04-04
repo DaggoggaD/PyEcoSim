@@ -66,7 +66,7 @@ blockStarted = False
 #Initialization calls and vars.
 _Draw_Walls(canvas)
 _Populate(20,cells)
-_FoodPopulate(100,foods)
+_FoodPopulate(200,foods)
 _InitializeCells(cells)
 objs = []
 objs.append(cells)
@@ -81,7 +81,6 @@ reprCell = None
 while not exit:
     #Background color.
     canvas.fill((200, 200, 200))
-
     #Safety cells food reset.
     if time<=10:
         for cell in cells:
@@ -169,6 +168,9 @@ while not exit:
 
         #Kills and reproduces top cells.
         sortList = sorted(cells, key=lambda x: x.food, reverse=True)
+        print("sortlist:\n")
+        for sorts in sortList:
+            print(sorts.food)
         sortList = sortList[:10]
         cells = [cell for cell in sortList]
 
@@ -189,7 +191,7 @@ while not exit:
             GlobalVar.metabolism -= 0.05
 
         foods = []
-        _FoodPopulate(100, foods)
+        _FoodPopulate(200, foods)
         objs[1]=foods
 
     #Fps getter.
@@ -197,12 +199,12 @@ while not exit:
     fps = Clock.get_fps( )
 
     #Display simulation info.
-    GlobalVar.Render_Text(f"METABOLISM: {str(round(GlobalVar.metabolism, 2))}", (0, 0, 0), [GlobalVar.width, GlobalVar.height - 170], canvas)
-    GlobalVar.Render_Text(f"FPS: {str(int(fps))}",(0,0,0),[GlobalVar.width,GlobalVar.height-140], canvas)
-    GlobalVar.Render_Text(f"GEN: {str(int(gen))}",(0,0,0),[GlobalVar.width,GlobalVar.height-110], canvas)
-    GlobalVar.Render_Text(f"AVG FOOD: {str(int(avgfood))}",(0,0,0),[GlobalVar.width,GlobalVar.height-80], canvas)
-    GlobalVar.Render_Text(f"MAX FOOD: {str(int(maxfood))}", (0, 0, 0), [GlobalVar.width, GlobalVar.height-50], canvas)
-    GlobalVar.Render_Text(f"POP: {str(int(len(cells)))}", (0, 0, 0), [GlobalVar.width, GlobalVar.height-20], canvas)
+    GlobalVar.Render_Text(f"METABOLISM (⚡️): {str(round(GlobalVar.metabolism, 2))}", (0, 0, 0), [GlobalVar.width+10, GlobalVar.height - 180], canvas)
+    GlobalVar.Render_Text(f"FPS: {str(int(fps))}",(0,0,0),[GlobalVar.width+10,GlobalVar.height-150], canvas)
+    GlobalVar.Render_Text(f"GEN: {str(int(gen))}",(0,0,0),[GlobalVar.width+10,GlobalVar.height-120], canvas)
+    GlobalVar.Render_Text(f"AVG FOOD: {str(int(avgfood))}",(0,0,0),[GlobalVar.width+10,GlobalVar.height-90], canvas)
+    GlobalVar.Render_Text(f"MAX FOOD: {str(int(maxfood))}", (0, 0, 0), [GlobalVar.width+10, GlobalVar.height-60], canvas)
+    GlobalVar.Render_Text(f"POP: {str(int(len(cells)))}", (0, 0, 0), [GlobalVar.width+10, GlobalVar.height-30], canvas)
 
     #Draws all walls.
     _Draw_Walls(canvas)

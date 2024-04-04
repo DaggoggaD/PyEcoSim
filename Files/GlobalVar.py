@@ -5,10 +5,10 @@ pygame.init()
 ###Variables###
 
 #Simulation variables
-width = 500
-height = 500
+width = 900
+height = 900
 dt = 1
-font = pygame.font.Font('freesansbold.ttf', 20)
+font = pygame.font.SysFont("segoeuisymbol", 20)
 sim_len = 15
 sim_len = sim_len * 60
 Walls = []

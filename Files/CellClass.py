@@ -156,10 +156,12 @@ class Cell:
             GlobalVar.Render_Text(strV, (0,0,0), [GlobalVar.width,10+30*i], canvas)
             lastrow+=1
 
-        GlobalVar.Render_Text(f"Food: {int(self.food)}", (0,0,0), [GlobalVar.width,10+30*lastrow], canvas)
-        GlobalVar.Render_Text(f"Area: {int(self.area)}", (0,0,0), [GlobalVar.width,10+30*(lastrow+1)], canvas)
-        GlobalVar.Render_Text(f"Area: {self.closeAreas}", (0,0,0), [GlobalVar.width,10+30*(lastrow+2)], canvas)
-        GlobalVar.Render_Text(f"Health: {self.health}", (0,0,0), [GlobalVar.width,10+30*(lastrow+3)], canvas)
+        GlobalVar.Render_Text(f"🍏: {int(self.food)}", (0,0,0), [GlobalVar.width+10,10+30*lastrow], canvas)
+        GlobalVar.Render_Text(f"✚: {round( self.health/(50+10*self.stats['health']),2)*100}%", (0,0,0), [GlobalVar.width+10,10+30*(lastrow+1)], canvas)
+        GlobalVar.Render_Text(f"💨: {round(self.stats['speed'],2)}", (0,0,0), [GlobalVar.width+10,10+30*(lastrow+2)], canvas)
+        GlobalVar.Render_Text(f"💥: {round(self.stats['attack'],2)}", (0,0,0), [GlobalVar.width+10,10+30*(lastrow+3)], canvas)
+        GlobalVar.Render_Text(f"⚡️: {round(self.stats['metabolism'],4)}", (0,0,0), [GlobalVar.width+10,10+30*(lastrow+4)], canvas)
+
 
     #Returns the boundaries of the cell.
     def BOUNDARY_POS(self):
@@ -307,7 +309,7 @@ class Cell:
 
     #Calcs metabolism cost each frame
     def _calc_metabolism(self):
-        self.food-=GlobalVar.metabolism
+        self.food-=GlobalVar.metabolism+self.stats["metabolism"]
 
     #Same as _generate_genome, but it only mutates the son's genome.
     #   Mutation chance is in GlobalVar.py.
@@ -403,7 +405,7 @@ class Cell:
     #   If the enemy dies, food is added to the winner.
     def _attack_cell(self, removeCELL, cells):
         for cell in removeCELL:
-            cell.health-=self.TEST_ATK_POWER
+            cell.health-=self.stats["attack"]
             cell.isFighting=True
             self.isFighting=True
             if cell.health <= 0:
@@ -413,11 +415,10 @@ class Cell:
 
     #Decodes stats into their respective personality task.
     def _dec_stats(self, stats):
-        self.stats["health"] = stats[0]             #
-        self.stats["speed"] = (10 - stats[0])/5     #
-        self.stats["attack"] = stats[1]
-        self.stats["metabolism"] = 10 - stats[1]
-
+        self.stats["health"] = stats[0]                 #0->10, becomes 50 + health stat*10 -> max of 150
+        self.stats["speed"] = (10 - stats[0])/5         #0->10
+        self.stats["attack"] = stats[1]/6.5              #0->0.5
+        self.stats["metabolism"] = (10 - stats[1])/200   #0->0.05
 
     #Initializes cell.
     #   Genome is generated (if needed);
