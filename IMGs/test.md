@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="">
-    <img src="IMGs/PyEcoSim.png" alt="Logo" width="150" height="150" style="border-radius: 25px">
+    <img src="PyEcoSim.png" id="readme-top" alt="Logo" width="150" height="150" style="border-radius: 25px">
   </a>
 
   <h3 align="center">PyEcoSim</h3>
@@ -38,35 +38,25 @@
 ## About The Project
 
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+PyEcoSim is a simple environment simulator featuring evolving cells with up to 10 neurons each.
+The objective of this application is to explore and understand natural selection by choosing only the top performers and allowing them to reproduce.
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
+The simulation is composed of cycles, lasting 30 seconds each. The environment is filled with 20 cells and 300 food objects.
 
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
+In the first generation the genome of each individual is randomized. At the end of the cycle the cells that managed to collect the most food survive and duplicate.
+This process is prone to mutations, allowing small genetic modifications each time.
 
-Use the `BLANK_README.md` to get started.
+To allow a better grasp of the subject, the simulation variables were tweaked to show significant changes in less than 30 generations, as shown in the graph below.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Cells can also have the ability to show cannibalistic tendencies, by killing other individuals and eating their food. Depending on the food bonus granted by this practice, cannibalism can have a huge impact on the simulation.
+In this project meat grants at least +30 food, as opposed to a maximum of 20 given by greens.
+
+<p align="right"><a href="#readme-top" id="about-the-project">back to top</a></p>
 
 
 
 ### Built With
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+The whole project is written in Python, using Pygame as the game UI.
 
 
 
