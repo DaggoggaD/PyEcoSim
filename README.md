@@ -1,7 +1,6 @@
 # PyEcoSim
-
 <div align="center">
-<img src="./GITIMG/Title.png">
+<img src="./IMGs/PyEcoSim.png" width=200>
 </div>
 
 
